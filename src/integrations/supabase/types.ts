@@ -14,7 +14,471 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      apex_market_state: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          model_version: number | null
+          payload: Json | null
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          model_version?: number | null
+          payload?: Json | null
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          model_version?: number | null
+          payload?: Json | null
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      apex_sim_trades: {
+        Row: {
+          contract: string
+          created_at: string
+          detail: Json | null
+          duration_ticks: number | null
+          entry_at: string | null
+          entry_condition: string | null
+          entry_digit: number | null
+          id: string
+          outcome: string | null
+          payout: number | null
+          pnl: number | null
+          resolution_digit: number | null
+          resolved_at: string | null
+          stake: number | null
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          contract: string
+          created_at?: string
+          detail?: Json | null
+          duration_ticks?: number | null
+          entry_at?: string | null
+          entry_condition?: string | null
+          entry_digit?: number | null
+          id?: string
+          outcome?: string | null
+          payout?: number | null
+          pnl?: number | null
+          resolution_digit?: number | null
+          resolved_at?: string | null
+          stake?: number | null
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          contract?: string
+          created_at?: string
+          detail?: Json | null
+          duration_ticks?: number | null
+          entry_at?: string | null
+          entry_condition?: string | null
+          entry_digit?: number | null
+          id?: string
+          outcome?: string | null
+          payout?: number | null
+          pnl?: number | null
+          resolution_digit?: number | null
+          resolved_at?: string | null
+          stake?: number | null
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      deriv_accounts: {
+        Row: {
+          balance: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          is_active: boolean
+          is_virtual: boolean
+          loginid: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          loginid: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_active?: boolean
+          is_virtual?: boolean
+          loginid?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parity_signals: {
+        Row: {
+          action: string
+          confidence: number | null
+          created_at: string
+          entry_formula: string | null
+          expires_at: string | null
+          id: string
+          market: string
+          outcome: string
+          published_at: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          action: string
+          confidence?: number | null
+          created_at?: string
+          entry_formula?: string | null
+          expires_at?: string | null
+          id: string
+          market: string
+          outcome?: string
+          published_at?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          action?: string
+          confidence?: number | null
+          created_at?: string
+          entry_formula?: string | null
+          expires_at?: string | null
+          id?: string
+          market?: string
+          outcome?: string
+          published_at?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
+      sentinel_calibration_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json | null
+          symbol: string
+          taken_on: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          symbol: string
+          taken_on?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          symbol?: string
+          taken_on?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      sentinel_combo_stats: {
+        Row: {
+          contract: string
+          created_at: string
+          current_streak: number | null
+          decay_half_life_ms: number | null
+          deterioration_pp: number | null
+          entry_condition: string
+          expectancy: number | null
+          id: string
+          last_outcome_at: string | null
+          longest_losing_streak: number | null
+          losses: number
+          max_drawdown: number | null
+          n: number
+          net_pnl: number | null
+          regime: string
+          symbol: string
+          updated_at: string
+          version: number
+          weighted_expectancy: number | null
+          weighted_n: number
+          weighted_wins: number
+          wins: number
+        }
+        Insert: {
+          contract: string
+          created_at?: string
+          current_streak?: number | null
+          decay_half_life_ms?: number | null
+          deterioration_pp?: number | null
+          entry_condition: string
+          expectancy?: number | null
+          id?: string
+          last_outcome_at?: string | null
+          longest_losing_streak?: number | null
+          losses?: number
+          max_drawdown?: number | null
+          n?: number
+          net_pnl?: number | null
+          regime: string
+          symbol: string
+          updated_at?: string
+          version?: number
+          weighted_expectancy?: number | null
+          weighted_n?: number
+          weighted_wins?: number
+          wins?: number
+        }
+        Update: {
+          contract?: string
+          created_at?: string
+          current_streak?: number | null
+          decay_half_life_ms?: number | null
+          deterioration_pp?: number | null
+          entry_condition?: string
+          expectancy?: number | null
+          id?: string
+          last_outcome_at?: string | null
+          longest_losing_streak?: number | null
+          losses?: number
+          max_drawdown?: number | null
+          n?: number
+          net_pnl?: number | null
+          regime?: string
+          symbol?: string
+          updated_at?: string
+          version?: number
+          weighted_expectancy?: number | null
+          weighted_n?: number
+          weighted_wins?: number
+          wins?: number
+        }
+        Relationships: []
+      }
+      sentinel_journal: {
+        Row: {
+          client_id: string
+          confidence: number | null
+          contract: string
+          contract_label: string | null
+          created_at: string
+          danger: number | null
+          edge_pct: number | null
+          entry_digit_index: number | null
+          id: string
+          mode: string
+          name: string | null
+          note: string | null
+          opportunity: number | null
+          outcome: string
+          quality: number | null
+          resolved_digit: number | null
+          symbol: string
+          ts: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          confidence?: number | null
+          contract: string
+          contract_label?: string | null
+          created_at?: string
+          danger?: number | null
+          edge_pct?: number | null
+          entry_digit_index?: number | null
+          id?: string
+          mode: string
+          name?: string | null
+          note?: string | null
+          opportunity?: number | null
+          outcome?: string
+          quality?: number | null
+          resolved_digit?: number | null
+          symbol: string
+          ts?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          confidence?: number | null
+          contract?: string
+          contract_label?: string | null
+          created_at?: string
+          danger?: number | null
+          edge_pct?: number | null
+          entry_digit_index?: number | null
+          id?: string
+          mode?: string
+          name?: string | null
+          note?: string | null
+          opportunity?: number | null
+          outcome?: string
+          quality?: number | null
+          resolved_digit?: number | null
+          symbol?: string
+          ts?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sentinel_learning_state: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          payload: Json | null
+          symbol: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json | null
+          symbol: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json | null
+          symbol?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      sentinel_operator_feedback: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          kind: string
+          payload: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          kind: string
+          payload?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          kind?: string
+          payload?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sentinel_sim_trades: {
+        Row: {
+          client_key: string | null
+          contract: string
+          created_at: string
+          danger: number | null
+          detail: Json | null
+          direction_score: number | null
+          duration_ticks: number | null
+          entry_at: string | null
+          entry_condition: string | null
+          entry_digit: number | null
+          id: string
+          pnl: number | null
+          regime: string | null
+          resolution_digit: number | null
+          resolved_at: string | null
+          result: string | null
+          setup_score: number | null
+          stake: number | null
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          client_key?: string | null
+          contract: string
+          created_at?: string
+          danger?: number | null
+          detail?: Json | null
+          direction_score?: number | null
+          duration_ticks?: number | null
+          entry_at?: string | null
+          entry_condition?: string | null
+          entry_digit?: number | null
+          id?: string
+          pnl?: number | null
+          regime?: string | null
+          resolution_digit?: number | null
+          resolved_at?: string | null
+          result?: string | null
+          setup_score?: number | null
+          stake?: number | null
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          client_key?: string | null
+          contract?: string
+          created_at?: string
+          danger?: number | null
+          detail?: Json | null
+          direction_score?: number | null
+          duration_ticks?: number | null
+          entry_at?: string | null
+          entry_condition?: string | null
+          entry_digit?: number | null
+          id?: string
+          pnl?: number | null
+          regime?: string | null
+          resolution_digit?: number | null
+          resolved_at?: string | null
+          result?: string | null
+          setup_score?: number | null
+          stake?: number | null
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
