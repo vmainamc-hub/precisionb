@@ -9,7 +9,9 @@ import {
   legFor,
   type BotBarrier,
   type BotLeg,
+  type n as BotDirection,
 } from "./spec";
+
 
 export interface SimTrade {
   index: number;
