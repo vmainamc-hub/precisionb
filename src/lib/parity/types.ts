@@ -3,6 +3,7 @@ import type { ParityEvidence, HardVeto, SoftBlocker, ParityContextEvidence } fro
 import type { MarketIntelligence } from "./market-intelligence";
 import type { ParityPsychologySnapshot } from "./psychology/types";
 import type { ParityProbabilityReport } from "./probability";
+import type { MaturityThesisSnapshot } from "./maturity-thesis";
 
 export type Parity = "EVEN" | "ODD";
 export type CellStage = "WATCHING" | "DEVELOPING" | "MATURE" | "READY" | "DECAYING" | "REJECTED";
@@ -47,6 +48,8 @@ export interface MaturitySnapshot {
   readonly adverseObservations: number;
   readonly ageMs: number;
   readonly maturitySince: number | null;
+  /** The actual multi-engine thesis that earned maturity. */
+  readonly thesis: MaturityThesisSnapshot;
   readonly stage: CellStage;
 }
 
