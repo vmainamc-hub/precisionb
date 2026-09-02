@@ -183,7 +183,7 @@ function validationDimension(
     oppose: significance.oppose + (1 - (probability?.calibratedProbability ?? 0.5)),
     available: significance.available || Boolean(probability),
     reason: probability
-      ? `Calibrated probability ${(probability.calibratedProbability * 100).toFixed(1)}%; Wilson lower edge ${(probability.wilsonLowerEdge * 100).toFixed(2)}%; calibration reliability ${(probability.calibrationReliability * 100).toFixed(0)}%.`
+      ? `Calibrated probability ${(probability.calibratedProbability * 100).toFixed(1)}%; Wilson lower edge ${(probability.wilsonLowerEdge * 100).toFixed(2)}%; calibration ${probability.calibrationReliable ? "reliable" : "unreliable"}.`
       : "Statistical validation is available but calibrated probability is not yet available.",
   });
 }

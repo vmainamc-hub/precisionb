@@ -25,14 +25,14 @@ function maturityStage(state: MutableParity30State, parity: Parity): CellStage {
       state.hardBlocks.length === 0 &&
       state.admissionBlocks.length === 0 &&
       state.suitability >= 72 &&
-      state.maturityThesis.qualifiedNow &&
+      state.maturityThesisSnapshot.qualifiedNow &&
       state.maturityThesis.qualifyingStreak >= 8 &&
       state.adverseStreak < 3;
     return ready ? "READY" : "MATURE";
   }
 
   if (state.observations < 20 || elapsedMs < 15_000) return "WATCHING";
-  if (state.maturityThesis.coherent || state.maturityThesis.score >= 45) return "DEVELOPING";
+  if (state.maturityThesisSnapshot.coherent || state.maturityThesis.score >= 45) return "DEVELOPING";
   return "DEVELOPING";
 }
 
