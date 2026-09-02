@@ -1,0 +1,8 @@
+{
+  "name": "Precision Edge",
+  "description": "AI-powered market scanner, high-confidence signal engine, and automated trading platform for Deriv synthetic indices.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

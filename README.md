@@ -1,29 +1,18 @@
-# Welcome to your Lovable project
+# Precision Sentinel + Precision Parity
 
-This project was built with [Lovable](https://lovable.dev).
+Standalone Deriv digit-intelligence application containing only the Sentinel/Apex and Precision Parity products plus the runtime infrastructure they require.
 
-## Build with Lovable
+## Product surface
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+- **Sentinel / Apex** — 90-cell observation, psychology, pressure, momentum, liquidity-sweep observation, ranking, governance/vetting, feedback and validated entry-point intelligence.
+- **Precision Parity** — even/odd parity analysis and its supporting engines, diagnostics and entry execution intelligence.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+## Deliberate exclusions
 
-## Development
+The standalone application does not expose or ship the unrelated Dashboard, generic Scanner, Precision Trend, Precision Edge product surface, Trading, Auto-Trading, Bot Builder, Bot Library, News, Signals, Analytics, Journal or Settings application routes.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Shared low-level modules remain only where Sentinel or Parity directly depends on them (for example Deriv streaming, account/auth infrastructure, the DBot replay dependency used by Sentinel entry validation, and the pressure substrate used by Sentinel psychology).
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+## Navigation
 
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+Sentinel and Parity are the only product tabs and are presented in the top navigation. There is no application sidebar.
