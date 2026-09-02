@@ -16,28 +16,31 @@ export type Database = {
     Tables: {
       apex_market_state: {
         Row: {
+          created_at: string
           id: string
           kind: string
-          model_version: number
-          payload: Json
+          model_version: number | null
+          payload: Json | null
           symbol: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
           kind: string
-          model_version?: number
-          payload?: Json
+          model_version?: number | null
+          payload?: Json | null
           symbol: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           kind?: string
-          model_version?: number
-          payload?: Json
+          model_version?: number | null
+          payload?: Json | null
           symbol?: string
           updated_at?: string
           user_id?: string
@@ -48,9 +51,9 @@ export type Database = {
         Row: {
           contract: string
           created_at: string
-          detail: Json
+          detail: Json | null
           duration_ticks: number | null
-          entry_at: string
+          entry_at: string | null
           entry_condition: string | null
           entry_digit: number | null
           id: string
@@ -66,9 +69,9 @@ export type Database = {
         Insert: {
           contract: string
           created_at?: string
-          detail?: Json
+          detail?: Json | null
           duration_ticks?: number | null
-          entry_at: string
+          entry_at?: string | null
           entry_condition?: string | null
           entry_digit?: number | null
           id?: string
@@ -84,9 +87,9 @@ export type Database = {
         Update: {
           contract?: string
           created_at?: string
-          detail?: Json
+          detail?: Json | null
           duration_ticks?: number | null
-          entry_at?: string
+          entry_at?: string | null
           entry_condition?: string | null
           entry_digit?: number | null
           id?: string
@@ -140,11 +143,50 @@ export type Database = {
         }
         Relationships: []
       }
+      parity_signals: {
+        Row: {
+          action: string
+          confidence: number | null
+          created_at: string
+          entry_formula: string | null
+          expires_at: string | null
+          id: string
+          market: string
+          outcome: string
+          published_at: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          action: string
+          confidence?: number | null
+          created_at?: string
+          entry_formula?: string | null
+          expires_at?: string | null
+          id: string
+          market: string
+          outcome?: string
+          published_at?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          action?: string
+          confidence?: number | null
+          created_at?: string
+          entry_formula?: string | null
+          expires_at?: string | null
+          id?: string
+          market?: string
+          outcome?: string
+          published_at?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
       sentinel_calibration_snapshots: {
         Row: {
           created_at: string
           id: string
-          payload: Json
+          payload: Json | null
           symbol: string
           taken_on: string
           version: number
@@ -152,7 +194,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          payload?: Json
+          payload?: Json | null
           symbol: string
           taken_on?: string
           version?: number
@@ -160,7 +202,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          payload?: Json
+          payload?: Json | null
           symbol?: string
           taken_on?: string
           version?: number
@@ -170,69 +212,72 @@ export type Database = {
       sentinel_combo_stats: {
         Row: {
           contract: string
-          current_streak: number
-          decay_half_life_ms: number
-          deterioration_pp: number
+          created_at: string
+          current_streak: number | null
+          decay_half_life_ms: number | null
+          deterioration_pp: number | null
           entry_condition: string
-          expectancy: number
+          expectancy: number | null
           id: string
           last_outcome_at: string | null
-          longest_losing_streak: number
+          longest_losing_streak: number | null
           losses: number
-          max_drawdown: number
+          max_drawdown: number | null
           n: number
-          net_pnl: number
+          net_pnl: number | null
           regime: string
           symbol: string
           updated_at: string
           version: number
-          weighted_expectancy: number
+          weighted_expectancy: number | null
           weighted_n: number
           weighted_wins: number
           wins: number
         }
         Insert: {
           contract: string
-          current_streak?: number
-          decay_half_life_ms?: number
-          deterioration_pp?: number
+          created_at?: string
+          current_streak?: number | null
+          decay_half_life_ms?: number | null
+          deterioration_pp?: number | null
           entry_condition: string
-          expectancy?: number
+          expectancy?: number | null
           id?: string
           last_outcome_at?: string | null
-          longest_losing_streak?: number
+          longest_losing_streak?: number | null
           losses?: number
-          max_drawdown?: number
+          max_drawdown?: number | null
           n?: number
-          net_pnl?: number
+          net_pnl?: number | null
           regime: string
           symbol: string
           updated_at?: string
           version?: number
-          weighted_expectancy?: number
+          weighted_expectancy?: number | null
           weighted_n?: number
           weighted_wins?: number
           wins?: number
         }
         Update: {
           contract?: string
-          current_streak?: number
-          decay_half_life_ms?: number
-          deterioration_pp?: number
+          created_at?: string
+          current_streak?: number | null
+          decay_half_life_ms?: number | null
+          deterioration_pp?: number | null
           entry_condition?: string
-          expectancy?: number
+          expectancy?: number | null
           id?: string
           last_outcome_at?: string | null
-          longest_losing_streak?: number
+          longest_losing_streak?: number | null
           losses?: number
-          max_drawdown?: number
+          max_drawdown?: number | null
           n?: number
-          net_pnl?: number
+          net_pnl?: number | null
           regime?: string
           symbol?: string
           updated_at?: string
           version?: number
-          weighted_expectancy?: number
+          weighted_expectancy?: number | null
           weighted_n?: number
           weighted_wins?: number
           wins?: number
@@ -254,7 +299,7 @@ export type Database = {
           name: string | null
           note: string | null
           opportunity: number | null
-          outcome: string | null
+          outcome: string
           quality: number | null
           resolved_digit: number | null
           symbol: string
@@ -275,7 +320,7 @@ export type Database = {
           name?: string | null
           note?: string | null
           opportunity?: number | null
-          outcome?: string | null
+          outcome?: string
           quality?: number | null
           resolved_digit?: number | null
           symbol: string
@@ -296,7 +341,7 @@ export type Database = {
           name?: string | null
           note?: string | null
           opportunity?: number | null
-          outcome?: string | null
+          outcome?: string
           quality?: number | null
           resolved_digit?: number | null
           symbol?: string
@@ -307,25 +352,28 @@ export type Database = {
       }
       sentinel_learning_state: {
         Row: {
+          created_at: string
           id: string
           kind: string
-          payload: Json
+          payload: Json | null
           symbol: string
           updated_at: string
           version: number
         }
         Insert: {
+          created_at?: string
           id?: string
           kind: string
-          payload?: Json
+          payload?: Json | null
           symbol: string
           updated_at?: string
           version?: number
         }
         Update: {
+          created_at?: string
           id?: string
           kind?: string
-          payload?: Json
+          payload?: Json | null
           symbol?: string
           updated_at?: string
           version?: number
@@ -338,7 +386,7 @@ export type Database = {
           id: string
           item_id: string
           kind: string
-          payload: Json
+          payload: Json | null
           updated_at: string
           user_id: string
         }
@@ -347,7 +395,7 @@ export type Database = {
           id?: string
           item_id: string
           kind: string
-          payload?: Json
+          payload?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -356,7 +404,7 @@ export type Database = {
           id?: string
           item_id?: string
           kind?: string
-          payload?: Json
+          payload?: Json | null
           updated_at?: string
           user_id?: string
         }
@@ -364,19 +412,19 @@ export type Database = {
       }
       sentinel_sim_trades: {
         Row: {
-          client_key: string
+          client_key: string | null
           contract: string
           created_at: string
           danger: number | null
-          detail: Json
+          detail: Json | null
           direction_score: number | null
           duration_ticks: number | null
-          entry_at: string
-          entry_condition: string
+          entry_at: string | null
+          entry_condition: string | null
           entry_digit: number | null
           id: string
           pnl: number | null
-          regime: string
+          regime: string | null
           resolution_digit: number | null
           resolved_at: string | null
           result: string | null
@@ -386,19 +434,19 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          client_key: string
+          client_key?: string | null
           contract: string
           created_at?: string
           danger?: number | null
-          detail?: Json
+          detail?: Json | null
           direction_score?: number | null
           duration_ticks?: number | null
-          entry_at: string
-          entry_condition?: string
+          entry_at?: string | null
+          entry_condition?: string | null
           entry_digit?: number | null
           id?: string
           pnl?: number | null
-          regime?: string
+          regime?: string | null
           resolution_digit?: number | null
           resolved_at?: string | null
           result?: string | null
@@ -408,19 +456,19 @@ export type Database = {
           user_id: string
         }
         Update: {
-          client_key?: string
+          client_key?: string | null
           contract?: string
           created_at?: string
           danger?: number | null
-          detail?: Json
+          detail?: Json | null
           direction_score?: number | null
           duration_ticks?: number | null
-          entry_at?: string
-          entry_condition?: string
+          entry_at?: string | null
+          entry_condition?: string | null
           entry_digit?: number | null
           id?: string
           pnl?: number | null
-          regime?: string
+          regime?: string | null
           resolution_digit?: number | null
           resolved_at?: string | null
           result?: string | null
