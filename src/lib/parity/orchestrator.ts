@@ -7,6 +7,7 @@ import { computeSpecificParityEntryDigit } from "@/lib/parity/engine-library/eng
 import { replayParityEntryDigit } from "@/lib/parity/dbot-replay";
 import { evaluateParityPsychology } from "@/lib/parity/psychology/engine";
 import { computeParityProbability } from "@/lib/parity/probability";
+import { updateMaturityThesis } from "@/lib/parity/maturity-thesis";
 import type { ParityEvidence, HardVeto, SoftBlocker } from "@/lib/parity/evidence/types";
 import type { CellDecision, FinalState, Parity, Parity30CellSnapshot, Parity30MarketInput, Parity30MarketSnapshot } from "./types";
 import { Parity30Registry } from "./registry";
@@ -215,6 +216,25 @@ function makeMarketSnapshot(input: Parity30MarketInput, registry: Parity30Regist
     state.probability = probability;
     state.admissionBlocks = [...new Set(admissionBlocks)];
 
+    // Maturity is earned by the complete engine council, not by observation
+    // count or the current suitability window. The thesis state is persistent
+    // per cell and is the sole authority for MATURE/DECAYING.
+    const thesis = updateMaturityThesis(
+      state.maturityThesis,
+      parity,
+      state.observations,
+      state.firstSeen,
+      input.timestamp,
+      run.evidence,
+      run.context,
+      psychology,
+      probability,
+      state.hardBlocks,
+      state.contradictionStreak,
+    );
+    state.maturityThesisSnapshot = thesis;
+    state.maturitySince = state.maturityThesis.matureSince;
+
     // Preserve the canonical grouped evidence numbers from the same run.
     state.supportScore = clamp(specific.support / Math.max(1, specific.groups));
     state.conflictScore = clamp(specific.oppose / Math.max(1, specific.groups));
@@ -231,7 +251,7 @@ function makeMarketSnapshot(input: Parity30MarketInput, registry: Parity30Regist
     finalState: finalState(cell),
     reasons: Object.freeze([
       `${cell.suitability.toFixed(0)}/100 suitability from grouped engine evidence.`,
-      `${cell.maturity.score.toFixed(0)}/100 maturity from persistence and clean observations.`,
+      `${cell.maturity.score.toFixed(0)}/100 earned-thesis maturity: ${cell.maturity.thesis.independentFamilies}/8 dimensions, coherence ${cell.maturity.thesis.coherence.toFixed(0)}/100, qualifying streak ${cell.maturity.thesis.qualifyingStreak}.`,
       `${cell.supportingEngines.length} supporting engine groups vs ${cell.opposingEngines.length} opposing groups.`,
       `Psychology: ${cell.psychology?.thesis ?? "unavailable"}`,
       cell.probability ? `Calibrated P(${cell.identity.parity}) ${(cell.probability.calibratedProbability * 100).toFixed(1)}%, lower-bound edge ${(cell.probability.wilsonLowerEdge * 100).toFixed(2)}%.` : "Probability unavailable.",

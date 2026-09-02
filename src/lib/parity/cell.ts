@@ -3,6 +3,7 @@ import type { CellIdentity, CellStage, MaturitySnapshot, Parity30CellSnapshot, S
 import type { MarketIntelligence } from "./market-intelligence";
 import { ParityEnsembleLearner } from "./engine-library/engines/ensemble-engine";
 import type { ParityPsychologySnapshot, MutableParityPsychologyState } from "./psychology/types";
+import { emptyMaturityThesisState, type MutableMaturityThesisState } from "./maturity-thesis";
 
 const clamp = (n: number, a = 0, b = 100) => Math.max(a, Math.min(b, Number.isFinite(n) ? n : 0));
 
@@ -12,64 +13,26 @@ export function cellIdFor(marketId: string, parity: Parity) {
 
 function maturityStage(state: MutableParity30State, parity: Parity): CellStage {
   const elapsedMs = state.firstSeen > 0 && state.lastUpdated > 0 ? state.lastUpdated - state.firstSeen : 0;
-  const recent = state.recentNetEvidence;
-  const recentSuitability = state.recentSuitability;
-  const recentClean = state.recentClean;
-  const n = recent.length;
-  const supportRatio = n ? recent.filter((v) => v >= 0.04).length / n : 0;
-  const adverseRatio = n ? recent.filter((v) => v <= -0.04).length / n : 0;
-  const cleanRatio = recentClean.length ? recentClean.filter(Boolean).length / recentClean.length : 0;
-  const avgSuitability = recentSuitability.length
-    ? recentSuitability.reduce((a, b) => a + b, 0) / recentSuitability.length
-    : state.suitability;
-
-  // A parity cell must WATCH the market for a meaningful period before it can
-  // call itself mature. Current-tick strength alone can never create maturity.
-  const minimumInteresting = 20;
-  const minimumDeveloping = 60;
-  const minimumMature = 90;
-  const matureElapsedMs = 60_000;
 
   if (state.hardBlocks.length && state.contradictionStreak >= 3) return "REJECTED";
-  if (state.observations < minimumInteresting || elapsedMs < 15_000) return "WATCHING";
-  if (state.observations < minimumDeveloping || elapsedMs < 45_000) return "DEVELOPING";
 
-  const mature =
-    state.observations >= minimumMature &&
-    elapsedMs >= matureElapsedMs &&
-    n >= 30 &&
-    supportRatio >= 0.58 &&
-    adverseRatio <= 0.30 &&
-    cleanRatio >= 0.70 &&
-    avgSuitability >= 60;
+  // Maturity is an earned thesis, not a recent-window classification. Once a
+  // thesis is earned it remains MATURE until sustained failure erodes it.
+  if (state.maturityThesis.failureStreak >= 12 && state.maturityThesis.matureSince !== null) return "DECAYING";
+  if (state.maturityThesis.matureSince !== null) {
 
-  if (mature) {
-    if (state.maturitySince === null) state.maturitySince = state.lastUpdated;
-    const qualifiesForReady =
-      state.hardBlocks.length === 0 &&
-      state.suitability >= 75 &&
-      supportRatio >= 0.62 &&
-      (state.psychology?.readyEligible ?? true) &&
-      (state.psychology?.chiefParity === "BALANCED" || state.psychology?.chiefParity === parity) &&
-      (state.psychology?.chiefHealth ?? 100) >= 65 &&
-      (state.psychology?.reversalRisk ?? 0) < 45 &&
-      (state.psychologyState.stableTicks >= 3 || state.psychologyState.matureScore >= 60) &&
-      state.admissionBlocks.length === 0 &&
-      state.supportStreak >= 3 &&
-      state.contradictionStreak === 0;
-    if (qualifiesForReady && state.readySince === null) state.readySince = state.lastUpdated;
-    // Once READY, a single contrary tick does not revoke the execution
-    // window. It takes sustained adverse evidence or a true hard block.
-    const remainsReady =
-      state.readySince !== null &&
+    const ready =
       state.hardBlocks.length === 0 &&
       state.admissionBlocks.length === 0 &&
-      state.adverseStreak < 3 &&
-      state.suitability >= 60;
-    return qualifiesForReady || remainsReady ? "READY" : "MATURE";
+      state.suitability >= 72 &&
+      state.maturityThesis.qualifiedNow &&
+      state.maturityThesis.qualifyingStreak >= 8 &&
+      state.adverseStreak < 3;
+    return ready ? "READY" : "MATURE";
   }
 
-  if (state.maturitySince !== null && state.suitability < 48) return "DECAYING";
+  if (state.observations < 20 || elapsedMs < 15_000) return "WATCHING";
+  if (state.maturityThesis.coherent || state.maturityThesis.score >= 45) return "DEVELOPING";
   return "DEVELOPING";
 }
 
@@ -110,6 +73,8 @@ export interface MutableParity30State {
   admissionBlocks: string[];
   psychology: ParityPsychologySnapshot | null;
   psychologyState: MutableParityPsychologyState;
+  maturityThesis: MutableMaturityThesisState;
+  maturityThesisSnapshot: import("./maturity-thesis").MaturityThesisSnapshot;
 }
 
 export function emptyCellState(now = Date.now()): MutableParity30State {
@@ -157,6 +122,10 @@ export function emptyCellState(now = Date.now()): MutableParity30State {
       matureScore: 0,
       lastHealth: 50,
       history: [],
+    },
+    maturityThesis: emptyMaturityThesisState(),
+    maturityThesisSnapshot: {
+      score: 0, coherent: false, qualifiedNow: false, independentFamilies: 0, dimensions: [], coherence: 0, persistence: 0, contradiction: 0, psychologyHealth: 0, statisticalConfidence: 0, thesisAgeMs: 0, qualifyingStreak: 0, failureStreak: 0, lastQualifiedAt: null, reasons: [], warnings: [],
     },
   };
 }
@@ -303,23 +272,9 @@ export function snapshotCell(identity: CellIdentity, state: MutableParity30State
     state.entryDigit = null;
     state.dbotValidated = null;
   }
-  const recent = state.recentNetEvidence;
-  const supportRatio = recent.length ? recent.filter((v) => v >= 0.04).length / recent.length : 0;
-  const cleanRatio = state.recentClean.length ? state.recentClean.filter(Boolean).length / state.recentClean.length : 0;
   const elapsedMs = state.firstSeen > 0 && state.lastUpdated > 0 ? state.lastUpdated - state.firstSeen : 0;
-  const observationProgress = Math.min(1, state.observations / 90);
-  const timeProgress = Math.min(1, elapsedMs / 60_000);
-  const coherenceProgress = Math.min(1, Math.max(0, (supportRatio - 0.5) / 0.2));
-  const cleanlinessProgress = cleanRatio;
-  const maturityScore = clamp(
-    observationProgress * 25 +
-    timeProgress * 20 +
-    coherenceProgress * 30 +
-    cleanlinessProgress * 15 +
-    Math.min(1, Math.max(0, state.suitability / 100)) * 10,
-  );
   const maturity: MaturitySnapshot = {
-    score: maturityScore,
+    score: state.maturityThesis.score,
     observations: state.observations,
     persistenceTicks: state.persistenceTicks,
     supportStreak: state.supportStreak,
@@ -328,7 +283,8 @@ export function snapshotCell(identity: CellIdentity, state: MutableParity30State
     supportiveObservations: state.supportiveObservations,
     adverseObservations: state.adverseObservations,
     ageMs: elapsedMs,
-    maturitySince: state.maturitySince,
+    maturitySince: state.maturityThesis.matureSince,
+    thesis: state.maturityThesisSnapshot,
     stage,
   };
   return Object.freeze({

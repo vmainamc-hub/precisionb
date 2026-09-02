@@ -68,7 +68,7 @@ function Detail({ cell }: { cell: Parity30CellSnapshot }) {
         </div>
         <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 text-xs">
           <div className="font-semibold">Maturity gate</div>
-          <div className="text-muted-foreground mt-1">The cell must observe the market for at least 90 ticks and 60 seconds, with sustained recent support and low contradiction. One contrary tick cannot erase a mature history.</div>
+          <div className="text-muted-foreground mt-1">MATURE is earned only when the independent engine dimensions form a coherent thesis. Observation count and age are eligibility floors, not maturity evidence; sustained thesis failure is required for decay.</div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs font-mono">
           <div>Supportive {cell.maturity.supportiveObservations}</div>
@@ -81,6 +81,11 @@ function Detail({ cell }: { cell: Parity30CellSnapshot }) {
           <div className="text-sm font-semibold">{cell.marketMechanism}</div>
           <div className="text-[10px] text-muted-foreground">Intelligence quality {cell.intelligenceQuality.toFixed(0)}/100</div>
           <ul className="space-y-1 text-[10px] text-muted-foreground list-disc pl-4">{cell.marketWhy.slice(0, 6).map((w, i) => <li key={i}>{w}</li>)}</ul>
+        </div>
+        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 space-y-2">
+          <div className="text-[10px] uppercase tracking-widest text-cyan-300">Thesis dimensions</div>
+          <div className="grid grid-cols-2 gap-1.5">{cell.maturity.thesis.dimensions.map(d => <div key={d.name} className="rounded bg-muted/30 px-2 py-1.5 text-[9px] font-mono"><div className="flex justify-between"><span>{d.name}</span><span>{d.score.toFixed(0)}</span></div><div className="text-muted-foreground mt-0.5">{d.reason}</div></div>)}</div>
+          {cell.maturity.thesis.warnings.length > 0 && <div className="text-[10px] text-amber-300">{cell.maturity.thesis.warnings[0]}</div>}
         </div>
       </div>
       <div className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
