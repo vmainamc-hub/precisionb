@@ -9,7 +9,7 @@ import {
   legFor,
   type BotBarrier,
   type BotLeg,
-  type n as BotDirection,
+  type BotDirection,
 } from "./spec";
 
 
