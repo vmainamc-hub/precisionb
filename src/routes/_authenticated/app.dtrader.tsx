@@ -161,12 +161,11 @@ function DTraderPage() {
         underlying_symbol: symbol,
       };
       if (
-        type === "DIGITOVER" ||
-        type === "DIGITUNDER" ||
-        type === "DIGITMATCH" ||
-        type === "DIGITDIFF"
-      )
-        payload.barrier = barrier;
+        type === "DIGITOVER" || type === "DIGITUNDER" ||
+        type === "DIGITMATCH" || type === "DIGITDIFF" ||
+        type === "HIGHER" || type === "LOWER" ||
+        type === "TOUCH" || type === "NOTOUCH"
+      ) payload.barrier = barrier;
       setLoading(true);
       const timer = window.setTimeout(async function () {
         try {
@@ -425,7 +424,7 @@ function DTraderPage() {
                 label="ODD"
                 value={
                   (
-                    (recent.filter(function (d) {
+                    (live1000.filter(function (d) {
                       return d % 2 !== 0;
                     }).length /
                       total) *
@@ -433,7 +432,7 @@ function DTraderPage() {
                   ).toFixed(1) + "%"
                 }
               />
-              <Metric label="LAST" value={recent.length ? recent[recent.length - 1] : "—"} />
+              <Metric label="LAST" value={live1000.length ? live1000[live1000.length - 1] : "—"} />
               <Metric label="SAMPLE" value={live1000.length + " / 1000"} />
               <Metric label="FEED" value={derivBus.getStatus().toUpperCase()} />
             </div>
