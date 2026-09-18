@@ -16,6 +16,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppApexRouteImport } from './routes/_authenticated/app.apex'
 import { Route as AuthenticatedAppPrecisionParityRouteImport } from './routes/_authenticated/app.precision-parity'
+import { Route as AuthenticatedAppDTraderRouteImport } from './routes/_authenticated/app.dtrader'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const AuthenticatedAppPrecisionParityRoute =
     path: '/precision-parity',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDTraderRoute = AuthenticatedAppDTraderRouteImport.update({
+  id: '/dtrader',
+  path: '/dtrader',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/apex': typeof AuthenticatedAppApexRoute
   '/app/precision-parity': typeof AuthenticatedAppPrecisionParityRoute
+  '/app/dtrader': typeof AuthenticatedAppDTraderRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/app/apex': typeof AuthenticatedAppApexRoute
   '/app/precision-parity': typeof AuthenticatedAppPrecisionParityRoute
+  '/app/dtrader': typeof AuthenticatedAppDTraderRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/apex': typeof AuthenticatedAppApexRoute
   '/_authenticated/app/precision-parity': typeof AuthenticatedAppPrecisionParityRoute
+  '/_authenticated/app/dtrader': typeof AuthenticatedAppDTraderRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -152,18 +161,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPrecisionParityRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/dtrader': {
+      id: '/_authenticated/app/dtrader'
+      path: '/dtrader'
+      fullPath: '/app/dtrader'
+      preLoaderRoute: typeof AuthenticatedAppDTraderRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppApexRoute: typeof AuthenticatedAppApexRoute
   AuthenticatedAppPrecisionParityRoute: typeof AuthenticatedAppPrecisionParityRoute
+  AuthenticatedAppDTraderRoute: typeof AuthenticatedAppDTraderRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppApexRoute: AuthenticatedAppApexRoute,
   AuthenticatedAppPrecisionParityRoute: AuthenticatedAppPrecisionParityRoute,
+  AuthenticatedAppDTraderRoute: AuthenticatedAppDTraderRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Brain, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { BarChart3, Brain, Radio, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,9 @@ function DTraderPage() {
   const [symbol, setSymbol] = useState("1HZ10V");
   const [ticks, setTicks] = useState(() => derivBus.getTicks("1HZ10V"));
   const [type, setType] = useState<ContractType>("DIGITUNDER");
-  const [markets, setMarkets] = useState<MarketMeta[]>(() => DERIV_SYMBOLS.map((m) => ({ symbol: m.symbol, name: m.name })));
+  const [markets, setMarkets] = useState<MarketMeta[]>(() =>
+    DERIV_SYMBOLS.map((m) => ({ symbol: m.symbol, name: m.name })),
+  );
   const [availableContracts, setAvailableContracts] = useState<AvailableContract[]>([]);
   const [metadataState, setMetadataState] = useState<"FALLBACK" | "LIVE">("FALLBACK");
   const [barrier, setBarrier] = useState(6);
@@ -193,9 +195,7 @@ function DTraderPage() {
         setAvailableContracts(usable);
         if (usable.length) {
           setType((current) =>
-            usable.some((x) => x.contract_type === current)
-              ? current
-              : usable[0].contract_type,
+            usable.some((x) => x.contract_type === current) ? current : usable[0].contract_type,
           );
         }
       } catch {
@@ -232,11 +232,16 @@ function DTraderPage() {
         underlying_symbol: symbol,
       };
       if (
-        type === "DIGITOVER" || type === "DIGITUNDER" ||
-        type === "DIGITMATCH" || type === "DIGITDIFF" ||
-        type === "HIGHER" || type === "LOWER" ||
-        type === "TOUCH" || type === "NOTOUCH"
-      ) payload.barrier = barrier;
+        type === "DIGITOVER" ||
+        type === "DIGITUNDER" ||
+        type === "DIGITMATCH" ||
+        type === "DIGITDIFF" ||
+        type === "HIGHER" ||
+        type === "LOWER" ||
+        type === "TOUCH" ||
+        type === "NOTOUCH"
+      )
+        payload.barrier = barrier;
       setLoading(true);
       const timer = window.setTimeout(async function () {
         try {
