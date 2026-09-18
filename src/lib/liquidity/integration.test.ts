@@ -8,6 +8,7 @@ function history() {
   });
 }
 
+// Unified-engine regression coverage: Precision Sentinel + DigitPulse.
 describe("DigitPulse liquidity integration", function () {
   it("keeps the full 1000-tick psychology and liquidity lifecycle in one analysis", function () {
     const result = analyzeMarket(history(), "1HZ10V");
