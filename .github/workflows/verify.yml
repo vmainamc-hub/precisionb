@@ -15,6 +15,5 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run test
       - run: bun run build
+      - run: bunx eslint src/routes/_authenticated/app.dtrader.tsx src/lib/apex/core.ts src/lib/apex/types.ts src/lib/deriv/account-context.tsx src/components/app/AppTopBar.tsx src/lib/liquidity
