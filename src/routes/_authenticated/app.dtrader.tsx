@@ -16,15 +16,47 @@ export const Route = createFileRoute("/_authenticated/app/dtrader")({
   component: DTraderPage,
 });
 
-type ContractType = "CALL" | "PUT" | "HIGHER" | "LOWER" | "TOUCH" | "NOTOUCH" | "DIGITEVEN" | "DIGITODD" | "DIGITOVER" | "DIGITUNDER" | "DIGITMATCH" | "DIGITDIFF";
+type ContractType =
+  | "CALL"
+  | "PUT"
+  | "HIGHER"
+  | "LOWER"
+  | "TOUCH"
+  | "NOTOUCH"
+  | "DIGITEVEN"
+  | "DIGITODD"
+  | "DIGITOVER"
+  | "DIGITUNDER"
+  | "DIGITMATCH"
+  | "DIGITDIFF";
+
 const FALLBACK_CONTRACTS: { id: ContractType; label: string }[] = [
-  { id: "CALL", label: "Rise" }, { id: "PUT", label: "Fall" }, { id: "HIGHER", label: "Higher" }, { id: "LOWER", label: "Lower" },
-  { id: "TOUCH", label: "Touch" }, { id: "NOTOUCH", label: "No Touch" }, { id: "DIGITEVEN", label: "Even" }, { id: "DIGITODD", label: "Odd" },
-  { id: "DIGITOVER", label: "Over" }, { id: "DIGITUNDER", label: "Under" }, { id: "DIGITMATCH", label: "Matches" }, { id: "DIGITDIFF", label: "Differs" },
+  { id: "CALL", label: "Rise" },
+  { id: "PUT", label: "Fall" },
+  { id: "HIGHER", label: "Higher" },
+  { id: "LOWER", label: "Lower" },
+  { id: "TOUCH", label: "Touch" },
+  { id: "NOTOUCH", label: "No Touch" },
+  { id: "DIGITEVEN", label: "Even" },
+  { id: "DIGITODD", label: "Odd" },
+  { id: "DIGITOVER", label: "Over" },
+  { id: "DIGITUNDER", label: "Under" },
+  { id: "DIGITMATCH", label: "Matches" },
+  { id: "DIGITDIFF", label: "Differs" },
 ];
-type MarketMeta = { symbol: string; name: string; market?: string; type?: string; pip?: number };
+
+type MarketMeta = {
+  symbol: string;
+  name: string;
+  market?: string;
+  type?: string;
+  pip?: number;
+};
 type AvailableContract = { contract_type: ContractType };
-function contractTypeLabel(id: ContractType) { return FALLBACK_CONTRACTS.find((c) => c.id === id)?.label ?? id; }
+
+function contractTypeLabel(id: ContractType) {
+  return FALLBACK_CONTRACTS.find((c) => c.id === id)?.label ?? id;
+}
 
 function DTraderPage() {
   const { client, account, balance, currency, status } = useDerivAccount();
@@ -115,14 +147,35 @@ function DTraderPage() {
           .filter((m: any) => {
             const s = String(m?.underlying_symbol || "");
             const market = String(m?.market || "").toLowerCase();
-            const synthetic = market.includes("synthetic") || market.includes("derived") || /^(R_|1HZ|BOOM|CRASH|RDBULL|RDBEAR|JD|JUMP|STEP|RANGE)/.test(s);
-            return m?.underlying_symbol && synthetic && m?.exchange_is_open !== 0 && m?.is_trading_suspended !== 1;
+            const synthetic =
+              market.includes("synthetic") ||
+              market.includes("derived") ||
+              /^(R_|1HZ|BOOM|CRASH|RDBULL|RDBEAR|JD|JUMP|STEP|RANGE)/.test(s);
+            return (
+              m?.underlying_symbol &&
+              synthetic &&
+              m?.exchange_is_open !== 0 &&
+              m?.is_trading_suspended !== 1
+            );
           })
-          .map((m: any) => ({ symbol: String(m.underlying_symbol), name: String(m.underlying_symbol_name || m.underlying_symbol), market: m.market, type: m.underlying_symbol_type, pip: Number(m.pip_size || 0) }));
-        if (live.length) { setMarkets(live); setMetadataState("LIVE"); }
-      } catch { setMetadataState("FALLBACK"); }
+          .map((m: any) => ({
+            symbol: String(m.underlying_symbol),
+            name: String(m.underlying_symbol_name || m.underlying_symbol),
+            market: m.market,
+            type: m.underlying_symbol_type,
+            pip: Number(m.pip_size || 0),
+          }));
+        if (live.length) {
+          setMarkets(live);
+          setMetadataState("LIVE");
+        }
+      } catch {
+        setMetadataState("FALLBACK");
+      }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [client, status]);
 
   useEffect(() => {
@@ -138,14 +191,27 @@ function DTraderPage() {
           .filter((id: string): id is ContractType => FALLBACK_CONTRACTS.some((c) => c.id === id))
           .map((id: ContractType) => ({ contract_type: id }));
         setAvailableContracts(usable);
-        if (usable.length && !usable.some((x) => x.contract_type === type)) setType(usable[0].contract_type);
-      } catch { setAvailableContracts([]); }
+        if (usable.length) {
+          setType((current) =>
+            usable.some((x) => x.contract_type === current)
+              ? current
+              : usable[0].contract_type,
+          );
+        }
+      } catch {
+        setAvailableContracts([]);
+      }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [client, status, symbol]);
 
   const contractChoices = availableContracts.length
-    ? availableContracts.map((c) => ({ id: c.contract_type, label: contractTypeLabel(c.contract_type) }))
+    ? availableContracts.map((c) => ({
+        id: c.contract_type,
+        label: contractTypeLabel(c.contract_type),
+      }))
     : FALLBACK_CONTRACTS;
 
   useEffect(
@@ -390,7 +456,10 @@ function DTraderPage() {
                 })}
               </div>
             </div>
-            <div className="mb-2 text-[9px] text-muted-foreground font-mono">Distribution: last {live1000.length} of 1000 canonical Deriv ticks · analysis window: {analysisRecent.length}</div>
+            <div className="mb-2 text-[9px] text-muted-foreground font-mono">
+              Distribution: last {live1000.length} of 1000 canonical Deriv ticks · analysis window:{" "}
+              {analysisRecent.length}
+            </div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
               {counts.map(function (c, d) {
                 const pct = (c / total) * 100;
@@ -570,7 +639,10 @@ function DTraderPage() {
                   })}
                 </div>
               </div>
-              {(type === "HIGHER" || type === "LOWER" || type === "TOUCH" || type === "NOTOUCH") && (
+              {(type === "HIGHER" ||
+                type === "LOWER" ||
+                type === "TOUCH" ||
+                type === "NOTOUCH") && (
                 <div>
                   <div className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">
                     Barrier
