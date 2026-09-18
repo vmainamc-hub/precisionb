@@ -427,10 +427,11 @@ class ApexCore {
     const cachedLiquidity = this.liquidityCache.get(symbol);
     let liquidity = cachedLiquidity?.stamp === liquidityStamp ? cachedLiquidity.analysis : null;
     if (!cachedLiquidity || cachedLiquidity.stamp !== liquidityStamp) {
-      const liquidityTicks = ticks.slice(-1000).map((tick, i) => ({
+      const liquidityStart = Math.max(0, ticks.length - 1000);
+      const liquidityTicks = ticks.slice(liquidityStart).map((tick, i) => ({
         q: tick.price,
         t: tick.t,
-        d: busDigits[Math.max(0, busDigits.length - ticks.length) + (ticks.length - Math.min(1000, ticks.length)) + i] ?? 0,
+        d: busDigits[liquidityStart + i] ?? 0,
       }));
       liquidity = liquidityTicks.length >= 20 ? analyzeLiquidityMarket(liquidityTicks, symbol) : null;
       this.liquidityCache.set(symbol, { stamp: liquidityStamp, analysis: liquidity });
