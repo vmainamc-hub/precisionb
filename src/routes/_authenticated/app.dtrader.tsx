@@ -112,7 +112,12 @@ function DTraderPage() {
         if (cancelled) return;
         const rows = Array.isArray(res.active_symbols) ? res.active_symbols : [];
         const live = rows
-          .filter((m: any) => m?.underlying_symbol && m?.exchange_is_open !== 0 && m?.is_trading_suspended !== 1)
+          .filter((m: any) => {
+            const s = String(m?.underlying_symbol || "");
+            const market = String(m?.market || "").toLowerCase();
+            const synthetic = market.includes("synthetic") || market.includes("derived") || /^(R_|1HZ|BOOM|CRASH|RDBULL|RDBEAR|JD|JUMP|STEP|RANGE)/.test(s);
+            return m?.underlying_symbol && synthetic && m?.exchange_is_open !== 0 && m?.is_trading_suspended !== 1;
+          })
           .map((m: any) => ({ symbol: String(m.underlying_symbol), name: String(m.underlying_symbol_name || m.underlying_symbol), market: m.market, type: m.underlying_symbol_type, pip: Number(m.pip_size || 0) }));
         if (live.length) { setMarkets(live); setMetadataState("LIVE"); }
       } catch { setMetadataState("FALLBACK"); }
@@ -565,6 +570,20 @@ function DTraderPage() {
                   })}
                 </div>
               </div>
+              {(type === "HIGHER" || type === "LOWER" || type === "TOUCH" || type === "NOTOUCH") && (
+                <div>
+                  <div className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                    Barrier
+                  </div>
+                  <Input
+                    type="number"
+                    step="any"
+                    value={barrier}
+                    onChange={(e) => setBarrier(Number(e.target.value))}
+                    className="bg-black/20 border-white/10 font-mono"
+                  />
+                </div>
+              )}
               {(type === "DIGITOVER" ||
                 type === "DIGITUNDER" ||
                 type === "DIGITMATCH" ||
@@ -679,6 +698,12 @@ function DTraderPage() {
 }
 
 function labelFor(type: ContractType, barrier: number) {
+  if (type === "CALL") return "Rise";
+  if (type === "PUT") return "Fall";
+  if (type === "HIGHER") return "Higher " + barrier;
+  if (type === "LOWER") return "Lower " + barrier;
+  if (type === "TOUCH") return "Touch " + barrier;
+  if (type === "NOTOUCH") return "No Touch " + barrier;
   if (type === "DIGITEVEN") return "Even";
   if (type === "DIGITODD") return "Odd";
   if (type === "DIGITOVER") return "Over " + barrier;
