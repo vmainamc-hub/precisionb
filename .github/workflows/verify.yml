@@ -3,6 +3,8 @@ name: Verify Precision Sentinel
 on:
   push:
     branches: ["main", "integration/**"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   verify:
