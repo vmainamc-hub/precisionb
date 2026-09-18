@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Brain, CandlestickChart, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { BarChart3, Brain, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -37,7 +38,7 @@ function DTraderPage() {
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [finder, setFinder] = useState("");
-  const [window, setWindow] = useState(100);
+  const [digitWindow, setDigitWindow] = useState(100);
   const [intel, setIntel] = useState<any>(null);
   const [open, setOpen] = useState<any>(null);
 
@@ -45,7 +46,7 @@ function DTraderPage() {
     return m.symbol === symbol;
   });
   const digits = derivBus.getDigits(symbol);
-  const recent = digits.slice(-window);
+  const recent = digits.slice(-digitWindow);
   const counts = useMemo(
     function () {
       return Array.from({ length: 10 }, function (_, d) {
@@ -54,7 +55,7 @@ function DTraderPage() {
         }).length;
       });
     },
-    [symbol, digits.length, window],
+    [recent],
   );
   const total = Math.max(1, recent.length);
 
@@ -322,11 +323,11 @@ function DTraderPage() {
                     <button
                       key={w}
                       onClick={function () {
-                        setWindow(w);
+                        setDigitWindow(w);
                       }}
                       className={
                         "px-2 py-1 rounded text-[9px] font-mono " +
-                        (window === w
+                        (digitWindow === w
                           ? "bg-cyan-400/15 text-cyan-200"
                           : "bg-white/5 text-muted-foreground")
                       }
