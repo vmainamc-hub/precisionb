@@ -1,13 +1,14 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useStream } from "@/lib/stream-context";
 import { useDerivAccount } from "@/lib/deriv/account-context";
-import { Wifi, WifiOff, Radio, Pause, Play, Wallet, Shield, Binary } from "lucide-react";
+import { Wifi, WifiOff, Radio, Pause, Play, Wallet, Shield, Binary, CandlestickChart } from "lucide-react";
 import { AlertSoundToggle } from "@/components/app/AlertSoundToggle";
 
 export function AppTopBar() {
   const s = useStream();
   const location = useLocation();
   const { account, balance, currency, status: derivStatus } = useDerivAccount();
+  const isDTrader = location.pathname.includes("/app/dtrader");
   const isSentinel = location.pathname.includes("/app/apex");
   const isParity = location.pathname.includes("/app/precision-parity");
 
@@ -23,6 +24,7 @@ export function AppTopBar() {
       </div>
 
       <nav className="flex items-center gap-1" aria-label="Primary">
+        <Link to="/app/dtrader" className={isDTrader ? "h-9 px-4 rounded-md text-xs font-semibold uppercase tracking-wider flex items-center gap-2 bg-primary text-primary-foreground" : "h-9 px-4 rounded-md text-xs font-semibold uppercase tracking-wider flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary/60"}><CandlestickChart size={13} /> DTrader</Link>
         <Link
           to="/app/apex"
           className={`h-9 px-4 rounded-md text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-colors ${
