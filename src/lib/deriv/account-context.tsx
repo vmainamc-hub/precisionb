@@ -47,6 +47,7 @@ export function DerivAccountProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrency] = useState<string | null>(null);
   const [portfolio, setPortfolio] = useState<Portfolio>({ contracts: [] });
   const [loading, setLoading] = useState(true);
+  const [client, setClient] = useState<DerivClient | null>(null);
   const clientRef = useRef<DerivClient | null>(null);
   const balSubId = useRef<string>("");
 
@@ -77,6 +78,7 @@ export function DerivAccountProvider({ children }: { children: ReactNode }) {
     if (!account) {
       clientRef.current?.close();
       clientRef.current = null;
+      setClient(null);
       setStatus("idle");
       setBalance(null);
       setCurrency(null);
@@ -85,6 +87,7 @@ export function DerivAccountProvider({ children }: { children: ReactNode }) {
     const c = new DerivClient(account.token);
     c.onStatus(setStatus);
     clientRef.current = c;
+    setClient(c);
     let cancelled = false;
     (async () => {
       try {
@@ -143,7 +146,7 @@ export function DerivAccountProvider({ children }: { children: ReactNode }) {
         portfolio,
         refreshAccount,
         refreshPortfolio,
-        client: clientRef.current,
+        client,
         loading,
       }}
     >
