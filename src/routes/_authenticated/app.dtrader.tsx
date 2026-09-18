@@ -16,22 +16,24 @@ export const Route = createFileRoute("/_authenticated/app/dtrader")({
   component: DTraderPage,
 });
 
-type ContractType =
-  "DIGITEVEN" | "DIGITODD" | "DIGITOVER" | "DIGITUNDER" | "DIGITMATCH" | "DIGITDIFF";
-const CONTRACTS: { id: ContractType; label: string }[] = [
-  { id: "DIGITEVEN", label: "Even" },
-  { id: "DIGITODD", label: "Odd" },
-  { id: "DIGITOVER", label: "Over" },
-  { id: "DIGITUNDER", label: "Under" },
-  { id: "DIGITMATCH", label: "Matches" },
-  { id: "DIGITDIFF", label: "Differs" },
+type ContractType = "CALL" | "PUT" | "HIGHER" | "LOWER" | "TOUCH" | "NOTOUCH" | "DIGITEVEN" | "DIGITODD" | "DIGITOVER" | "DIGITUNDER" | "DIGITMATCH" | "DIGITDIFF";
+const FALLBACK_CONTRACTS: { id: ContractType; label: string }[] = [
+  { id: "CALL", label: "Rise" }, { id: "PUT", label: "Fall" }, { id: "HIGHER", label: "Higher" }, { id: "LOWER", label: "Lower" },
+  { id: "TOUCH", label: "Touch" }, { id: "NOTOUCH", label: "No Touch" }, { id: "DIGITEVEN", label: "Even" }, { id: "DIGITODD", label: "Odd" },
+  { id: "DIGITOVER", label: "Over" }, { id: "DIGITUNDER", label: "Under" }, { id: "DIGITMATCH", label: "Matches" }, { id: "DIGITDIFF", label: "Differs" },
 ];
+type MarketMeta = { symbol: string; name: string; market?: string; type?: string; pip?: number };
+type AvailableContract = { contract_type: ContractType };
+function contractTypeLabel(id: ContractType) { return FALLBACK_CONTRACTS.find((c) => c.id === id)?.label ?? id; }
 
 function DTraderPage() {
   const { client, account, balance, currency, status } = useDerivAccount();
   const [symbol, setSymbol] = useState("1HZ10V");
   const [ticks, setTicks] = useState(() => derivBus.getTicks("1HZ10V"));
   const [type, setType] = useState<ContractType>("DIGITUNDER");
+  const [markets, setMarkets] = useState<MarketMeta[]>(() => DERIV_SYMBOLS.map((m) => ({ symbol: m.symbol, name: m.name })));
+  const [availableContracts, setAvailableContracts] = useState<AvailableContract[]>([]);
+  const [metadataState, setMetadataState] = useState<"FALLBACK" | "LIVE">("FALLBACK");
   const [barrier, setBarrier] = useState(6);
   const [duration, setDuration] = useState(5);
   const [stake, setStake] = useState(10);
@@ -46,18 +48,21 @@ function DTraderPage() {
     return m.symbol === symbol;
   });
   const digits = derivBus.getDigits(symbol);
-  const recent = digits.slice(-digitWindow);
+  // The cockpit distribution is always the authoritative last 1000 Deriv ticks.
+  // Smaller windows remain analysis controls only.
+  const live1000 = digits.slice(-1000);
+  const analysisRecent = digits.slice(-digitWindow);
   const counts = useMemo(
     function () {
       return Array.from({ length: 10 }, function (_, d) {
-        return recent.filter(function (x) {
+        return live1000.filter(function (x) {
           return x === d;
         }).length;
       });
     },
-    [recent],
+    [live1000],
   );
-  const total = Math.max(1, recent.length);
+  const total = Math.max(1, live1000.length);
 
   useEffect(
     function () {
@@ -96,6 +101,48 @@ function DTraderPage() {
     [symbol],
   );
 
+  // Live market/contract metadata comes from Deriv. It does not create another
+  // tick stream; derivBus remains the single canonical price/digit feed.
+  useEffect(() => {
+    if (!client || status !== "open") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await client.send({ active_symbols: "brief" });
+        if (cancelled) return;
+        const rows = Array.isArray(res.active_symbols) ? res.active_symbols : [];
+        const live = rows
+          .filter((m: any) => m?.underlying_symbol && m?.exchange_is_open !== 0 && m?.is_trading_suspended !== 1)
+          .map((m: any) => ({ symbol: String(m.underlying_symbol), name: String(m.underlying_symbol_name || m.underlying_symbol), market: m.market, type: m.underlying_symbol_type, pip: Number(m.pip_size || 0) }));
+        if (live.length) { setMarkets(live); setMetadataState("LIVE"); }
+      } catch { setMetadataState("FALLBACK"); }
+    })();
+    return () => { cancelled = true; };
+  }, [client, status]);
+
+  useEffect(() => {
+    if (!client || status !== "open") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await client.send({ contracts_for: symbol });
+        if (cancelled) return;
+        const rows = Array.isArray(res.contracts_for?.available) ? res.contracts_for.available : [];
+        const usable = rows
+          .map((x: any) => String(x.contract_type))
+          .filter((id: string): id is ContractType => FALLBACK_CONTRACTS.some((c) => c.id === id))
+          .map((id: ContractType) => ({ contract_type: id }));
+        setAvailableContracts(usable);
+        if (usable.length && !usable.some((x) => x.contract_type === type)) setType(usable[0].contract_type);
+      } catch { setAvailableContracts([]); }
+    })();
+    return () => { cancelled = true; };
+  }, [client, status, symbol]);
+
+  const contractChoices = availableContracts.length
+    ? availableContracts.map((c) => ({ id: c.contract_type, label: contractTypeLabel(c.contract_type) }))
+    : FALLBACK_CONTRACTS;
+
   useEffect(
     function () {
       if (!client || status !== "open") {
@@ -114,12 +161,11 @@ function DTraderPage() {
         underlying_symbol: symbol,
       };
       if (
-        type === "DIGITOVER" ||
-        type === "DIGITUNDER" ||
-        type === "DIGITMATCH" ||
-        type === "DIGITDIFF"
-      )
-        payload.barrier = barrier;
+        type === "DIGITOVER" || type === "DIGITUNDER" ||
+        type === "DIGITMATCH" || type === "DIGITDIFF" ||
+        type === "HIGHER" || type === "LOWER" ||
+        type === "TOUCH" || type === "NOTOUCH"
+      ) payload.barrier = barrier;
       setLoading(true);
       const timer = window.setTimeout(async function () {
         try {
@@ -192,7 +238,7 @@ function DTraderPage() {
   }
 
   const candidates = intel?.contracts || [];
-  const filtered = DERIV_SYMBOLS.filter(function (m) {
+  const filtered = markets.filter(function (m) {
     return (m.name + " " + m.symbol).toLowerCase().includes(finder.toLowerCase());
   });
   const price = ticks.length ? ticks[ticks.length - 1].price : null;
@@ -211,7 +257,8 @@ function DTraderPage() {
             </div>
           </div>
           <div className="flex-1 flex gap-1 overflow-x-auto no-scrollbar">
-            {["1HZ10V", "R_10", "R_25", "R_50", "BOOM500"].map(function (s) {
+            {markets.slice(0, 12).map(function (m) {
+              const s = m.symbol;
               return (
                 <button
                   key={s}
@@ -314,7 +361,7 @@ function DTraderPage() {
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-cyan-300" />
                 <span className="text-xs font-semibold uppercase tracking-wider">
-                  0–9 Live Digit Intelligence
+                  0–9 Live Digit Intelligence · DERIV 1000 TICKS
                 </span>
               </div>
               <div className="flex gap-1">
@@ -338,6 +385,7 @@ function DTraderPage() {
                 })}
               </div>
             </div>
+            <div className="mb-2 text-[9px] text-muted-foreground font-mono">Distribution: last {live1000.length} of 1000 canonical Deriv ticks · analysis window: {analysisRecent.length}</div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
               {counts.map(function (c, d) {
                 const pct = (c / total) * 100;
@@ -364,7 +412,7 @@ function DTraderPage() {
                 label="EVEN"
                 value={
                   (
-                    (recent.filter(function (d) {
+                    (live1000.filter(function (d) {
                       return d % 2 === 0;
                     }).length /
                       total) *
@@ -376,7 +424,7 @@ function DTraderPage() {
                 label="ODD"
                 value={
                   (
-                    (recent.filter(function (d) {
+                    (live1000.filter(function (d) {
                       return d % 2 !== 0;
                     }).length /
                       total) *
@@ -384,8 +432,8 @@ function DTraderPage() {
                   ).toFixed(1) + "%"
                 }
               />
-              <Metric label="LAST" value={recent.length ? recent[recent.length - 1] : "—"} />
-              <Metric label="SAMPLE" value={recent.length} />
+              <Metric label="LAST" value={live1000.length ? live1000[live1000.length - 1] : "—"} />
+              <Metric label="SAMPLE" value={live1000.length + " / 1000"} />
               <Metric label="FEED" value={derivBus.getStatus().toUpperCase()} />
             </div>
           </div>
@@ -497,7 +545,7 @@ function DTraderPage() {
                   Contract
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
-                  {CONTRACTS.map(function (c) {
+                  {contractChoices.map(function (c) {
                     return (
                       <button
                         key={c.id}
