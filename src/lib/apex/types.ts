@@ -10,6 +10,7 @@ import type { ForwardState } from "./forward";
 import type { FakeEdgeCheck, ContractBattle } from "./battle";
 import type { DigitIntel } from "./digit-intel";
 import type { BarStructure } from "./bars";
+import type { ContractAnalysis as LiquidityContractAnalysis, MarketAnalysis as LiquidityMarketAnalysis } from "../liquidity/engine";
 
 export type ApexContractId = "UNDER6" | "UNDER7" | "UNDER8" | "OVER1" | "OVER2" | "OVER3";
 
@@ -202,6 +203,8 @@ export interface ContractEval {
   winningSideMomentum?: import("@/lib/sentinel/winning-side-momentum").WinningSideMomentum | null;
   /** Canonical danger composition computed once per cycle by ApexCore. */
   dangerComposition?: import("@/lib/sentinel/danger").DangerComposition | null;
+  /** DigitPulse liquidity/formation intelligence, computed from the same canonical tick history. */
+  liquidity?: LiquidityContractAnalysis | null;
 }
 
 export interface MarketIntel {
@@ -243,6 +246,8 @@ export interface MarketIntel {
   psychology: import("./psychology").PsychologyReport | null;
   /** Market-level SPECIAL DIGIT RISK for 0/1/8/9. */
   specialDigits: import("./special-digits").SpecialDigitReport | null;
+  /** Full DigitPulse liquidity + 1,000-tick psychology analysis on the same feed. */
+  liquidity?: LiquidityMarketAnalysis | null;
   /** FLUCTUATION_SCORE / STATE / SIGNAL_FLICKER_RATE for this market. */
   fluctuation: import("./fluctuation").FluctuationReport | null;
 }

@@ -93,6 +93,8 @@ class ApexCore {
   private pendingCycle = false;
   /** Rolling average cost of one cycle (ms) — drives adaptive back-off. */
   private avgCycleMs = 0;
+  /** Cached DigitPulse analysis keyed by symbol and latest canonical tick. */
+  private liquidityCache = new Map<string, { stamp: string; analysis: LiquidityMarketAnalysis | null }>();
 
 
   /** Deep digit history for a market (up to 5000 ticks). */
@@ -354,6 +356,7 @@ class ApexCore {
     this.deepDigits.clear();
     this.deepPrices.clear();
     this.ensembleCache.clear();
+    this.liquidityCache.clear();
     this.pending.clear();
     this.cursor = 0;
     this.version = 0;
@@ -413,6 +416,25 @@ class ApexCore {
         fluctuation: null,
       });
       return;
+    }
+
+    // DigitPulse liquidity intelligence runs on the SAME canonical ticks as Apex.
+    // It never opens another socket or maintains a second feed. Cache by latest
+    // tick identity so the expensive formation/lifecycle engine is not rerun when
+    // a scheduler cycle occurs without new market data.
+    const latestTick = ticks[ticks.length - 1];
+    const liquidityStamp = `${ticks.length}:${latestTick?.t ?? 0}`;
+    const cachedLiquidity = this.liquidityCache.get(symbol);
+    let liquidity = cachedLiquidity?.stamp === liquidityStamp ? cachedLiquidity.analysis : null;
+    if (!cachedLiquidity || cachedLiquidity.stamp !== liquidityStamp) {
+      const liquidityStart = Math.max(0, ticks.length - 1000);
+      const liquidityTicks = ticks.slice(liquidityStart).map((tick, i) => ({
+        q: tick.price,
+        t: tick.t,
+        d: busDigits[liquidityStart + i] ?? 0,
+      }));
+      liquidity = liquidityTicks.length >= 20 ? analyzeLiquidityMarket(liquidityTicks, symbol) : null;
+      this.liquidityCache.set(symbol, { stamp: liquidityStamp, analysis: liquidity });
     }
 
     const prices = tail(ticks, WINDOW_BASE).map((t) => t.price);
@@ -495,6 +517,7 @@ class ApexCore {
         entropyDelta,
         settings,
       });
+      evaluation.liquidity = liquidity?.contracts.find((lc) => lc.id === id) ?? null;
       history.push(evaluation.compositeEdge);
       if (history.length > 60) history.splice(0, history.length - 60);
       this.edgeHistory.set(histKey, history);
@@ -611,6 +634,7 @@ class ApexCore {
       psychology,
       specialDigits,
       fluctuation,
+      liquidity,
     };
 
     // ── ONE AUTHORITATIVE DANGER VALUE (PHASE 15B) ────────────────────
