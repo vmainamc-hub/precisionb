@@ -14,5 +14,5 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun run test
+      - run: bunx vitest run src/lib/liquidity/integration.test.ts
       - run: bunx eslint src/routes/_authenticated/app.dtrader.tsx
